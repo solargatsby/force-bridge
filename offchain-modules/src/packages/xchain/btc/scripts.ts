@@ -74,7 +74,7 @@ export class BTCChain {
             txHash: waitVerifyTxs[txIndex].hash,
             rawTx: waitVerifyTxs[txIndex].hex,
             txIndex: txIndex,
-            amount: txVouts[0].value,
+            amount: Unit.fromBTC(txVouts[0].value).toSatoshis(),
             data: Buffer.from(txVouts[1].scriptPubKey.hex.substring(4), 'hex').toString(),
           };
           logger.debug(`verify for lock event. btc lock data: ${JSON.stringify(data, null, 2)}`);
@@ -158,8 +158,8 @@ export class BTCChain {
         tx_hash = tx_hash.substring(2);
       }
       unlockData = unlockData + tx_hash;
-      VinNeedAmount = VinNeedAmount + BigInt(Unit.fromBTC(r.amount).toSatoshis());
-      unlockVout.push({ address: r.recipientAddress, satoshis: Unit.fromBTC(r.amount).toSatoshis() });
+      VinNeedAmount = VinNeedAmount + BigInt(r.amount);
+      unlockVout.push({ address: r.recipientAddress, satoshis: Number(r.amount) });
     });
     let BurnTxHashes = Buffer.from(unlockData, 'hex');
 

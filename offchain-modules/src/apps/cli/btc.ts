@@ -1,5 +1,5 @@
 import commander from 'commander';
-import { getSudtBalance, parseOptions } from './utils';
+import { parseOptions } from './utils';
 import { BtcAsset } from '../../packages/ckb/model/asset';
 import { Account } from '../../packages/ckb/model/accounts';
 import { CkbTxGenerator } from '../../packages/ckb/tx-helper/generator';
@@ -18,7 +18,7 @@ btcCmd
   .command('lock')
   .requiredOption('-p, --privateKey', 'private key of locked account')
   .requiredOption('-u, --userAddr', 'address on btc')
-  .requiredOption('-a, --amount', 'amount to lock')
+  .requiredOption('-a, --amount', 'amount to lock. unit is btc')
   .requiredOption('-r, recipient', 'recipient address on ckb')
   .option('-e, extra', 'extra data of sudt')
   .option('--feeRate', 'satoshis/byte of tx data. default value will be from https://bitcoinfees.earn.com/#fees')
@@ -29,14 +29,14 @@ btcCmd
   .command('unlock')
   .requiredOption('-r, recipient', 'recipient address on btc')
   .requiredOption('-p, --privateKey', 'private key of unlock address on ckb')
-  .requiredOption('-a, --amount', 'amount of unlock')
+  .requiredOption('-a, --amount', 'amount of unlock. unit is btc')
   .action(doUnlock)
   .description('unlock asset on btc');
 
 btcCmd
   .command('balanceOf')
-  .option('-p, --privateKey', 'private key of locked address on ckb')
-  .option('-addr, --address', 'address on btc')
+  .option('-p, --privateKey', 'private key of locked address on ckb. unit is btc')
+  .option('-addr, --address', 'address on btc. unit is btc')
   .action(doBalanceOf)
   .description('query balance of address on btc');
 
@@ -73,7 +73,7 @@ async function doUnlock(opts: any, command: any) {
 
   const account = new Account(privateKey);
   const generator = new CkbTxGenerator(ForceBridgeCore.ckb, new IndexerCollector(ForceBridgeCore.indexer));
-  const burnAmount = new Amount(amount);
+  const burnAmount = new Amount(Unit.fromBTC(amount).toSatoshis());
   const ownLockHash = ForceBridgeCore.ckb.utils.scriptToHash(<CKBComponents.Script>await account.getLockscript());
   const burnTx = await generator.burn(
     await account.getLockscript(),
@@ -102,7 +102,7 @@ async function doBalanceOf(opts: any, command: any) {
       action: 'start',
       scanobjects: [`addr(${address})`],
     });
-    console.log(`BalanceOf address:${address} on BTC is ${liveUtxos.total_amount}`);
+    console.log(`BalanceOf address:${address} on BTC is ${liveUtxos.total_amount} btc`);
   }
   if (privateKey) {
     const collector = new IndexerCollector(ForceBridgeCore.indexer);
@@ -124,6 +124,6 @@ async function doBalanceOf(opts: any, command: any) {
       new Script(sudtType.codeHash, sudtType.args, sudtType.hashType),
       await account.getLockscript(),
     );
-    console.log(`BalanceOf address:${account.address} on ckb is ${balance}`);
+    console.log(`BalanceOf address:${account.address} on ckb is ${Unit.fromSatoshis(balance).toBTC()} xbtc`);
   }
 }
