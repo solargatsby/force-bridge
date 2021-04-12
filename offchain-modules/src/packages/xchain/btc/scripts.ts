@@ -19,6 +19,7 @@ import axios from 'axios';
 const Unit = bitcore.Unit;
 const BtcLockEventMark = 'ck';
 const BtcOPReturnCode = '6a';
+const BtcDataIndex = 4;
 const CkbTxHashLen = 64;
 
 export class BTCChain {
@@ -73,7 +74,7 @@ export class BTCChain {
             txHash: waitVerifyTxs[txIndex].hash,
             rawTx: waitVerifyTxs[txIndex].hex,
             txIndex: txIndex,
-            amount: Unit.fromBTC(txVouts[0].value).toSatoshis(),
+            amount: txVouts[0].value,
             data: Buffer.from(txVouts[1].scriptPubKey.hex.substring(4), 'hex').toString(),
           };
           logger.debug(`verify for lock event. btc lock data: ${JSON.stringify(data, null, 2)}`);
@@ -101,7 +102,7 @@ export class BTCChain {
       scanobjects: [`addr(${fromAdress})`],
     });
 
-    logger.debug(`collect live utxos for lock: ${JSON.stringify(liveUtxos, null, 2)}`);
+    logger.debug(`collect live utxos for lock. total_amount is : ${liveUtxos.total_amount} btc`);
     const utxos = getVins(liveUtxos, BigInt(amount));
     if (utxos.length === 0) {
       throw new Error(
@@ -157,8 +158,8 @@ export class BTCChain {
         tx_hash = tx_hash.substring(2);
       }
       unlockData = unlockData + tx_hash;
-      VinNeedAmount = VinNeedAmount + BigInt(r.amount);
-      unlockVout.push({ address: r.recipientAddress, satoshis: Number(r.amount) });
+      VinNeedAmount = VinNeedAmount + BigInt(Unit.fromBTC(r.amount).toSatoshis());
+      unlockVout.push({ address: r.recipientAddress, satoshis: Unit.fromBTC(r.amount).toSatoshis() });
     });
     let BurnTxHashes = Buffer.from(unlockData, 'hex');
 
@@ -218,7 +219,7 @@ export class BTCChain {
     if (firstVoutScriptAddrList.length != 1) {
       return false;
     }
-    const receiveAddr = Buffer.from(secondVoutScriptPubKeyHex.substring(4), 'hex').toString();
+    const receiveAddr = Buffer.from(secondVoutScriptPubKeyHex.substring(BtcDataIndex), 'hex').toString();
 
     if (receiveAddr.startsWith(BtcLockEventMark)) {
       logger.debug(
@@ -241,7 +242,7 @@ export class BTCChain {
       const voutPubkeyHex = waitVerifyTxVouts[i].scriptPubKey.hex;
       if (voutPubkeyHex.startsWith(BtcOPReturnCode)) {
         logger.debug(`verify op return output data : ${voutPubkeyHex}`);
-        return splitTxhash(voutPubkeyHex.substring(4));
+        return splitTxhash(voutPubkeyHex.substring(BtcDataIndex));
       }
     }
     return [];

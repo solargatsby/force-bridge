@@ -74,7 +74,7 @@ async function doUnlock(opts: any, command: any) {
   const account = new Account(privateKey);
   const generator = new CkbTxGenerator(ForceBridgeCore.ckb, new IndexerCollector(ForceBridgeCore.indexer));
   const burnAmount = new Amount(amount);
-  const ownLockHash = ckb.utils.scriptToHash(<CKBComponents.Script>await account.getLockscript());
+  const ownLockHash = ForceBridgeCore.ckb.utils.scriptToHash(<CKBComponents.Script>await account.getLockscript());
   const burnTx = await generator.burn(
     await account.getLockscript(),
     recipientAddress.toString(),
@@ -107,14 +107,14 @@ async function doBalanceOf(opts: any, command: any) {
   if (privateKey) {
     const collector = new IndexerCollector(ForceBridgeCore.indexer);
     const account = new Account(privateKey);
-    const ownLockHash = ckb.utils.scriptToHash(<CKBComponents.Script>await account.getLockscript());
+    const ownLockHash = ForceBridgeCore.ckb.utils.scriptToHash(<CKBComponents.Script>await account.getLockscript());
     const asset = new BtcAsset('btc', ownLockHash);
     const bridgeCellLockscript = {
       codeHash: ForceBridgeCore.config.ckb.deps.bridgeLock.script.codeHash,
       hashType: ForceBridgeCore.config.ckb.deps.bridgeLock.script.hashType,
       args: asset.toBridgeLockscriptArgs(),
     };
-    const sudtArgs = ckb.utils.scriptToHash(<CKBComponents.Script>bridgeCellLockscript);
+    const sudtArgs = ForceBridgeCore.ckb.utils.scriptToHash(<CKBComponents.Script>bridgeCellLockscript);
     const sudtType = {
       codeHash: ForceBridgeCore.config.ckb.deps.sudtType.script.codeHash,
       hashType: ForceBridgeCore.config.ckb.deps.sudtType.script.hashType,
