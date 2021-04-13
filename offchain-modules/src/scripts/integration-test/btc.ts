@@ -210,7 +210,7 @@ async function main() {
   logger.debug(`successful lock records ${JSON.stringify(lockRecords, null, 2)}`);
   const unlockRecords: BtcUnlock[] = await btcDb.getBtcUnlockRecords('success');
   logger.debug(`successful unlock records  ${JSON.stringify(unlockRecords, null, 2)}`);
-  assert(lockRecords[0].data === LockEventReceipent);
+  assert(lockRecords[0].data.slice(0, 46) === LockEventReceipent);
   assert(unlockRecords[0].recipientAddress === userAddr.toString());
   logger.debug('end btc test lock and unlock');
 }
