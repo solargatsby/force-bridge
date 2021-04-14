@@ -57,7 +57,7 @@ export class BTCChain {
       let waitVerifyTxs = block.tx.slice(1);
       for (let txIndex = 0; txIndex < waitVerifyTxs.length; txIndex++) {
         const txVouts = waitVerifyTxs[txIndex].vout;
-        const ckbBurnTxHashes: string[] = await this.getUnockTxData(waitVerifyTxs[txIndex].vin, txVouts);
+        const ckbBurnTxHashes: string[] = await this.getUnlockTxData(waitVerifyTxs[txIndex].vin, txVouts);
         if (ckbBurnTxHashes.length != 0) {
           logger.debug(
             `verify for unlock event. block ${blockHeight} tx ${waitVerifyTxs[txIndex].hash}. find ckb burn hashes:  ${ckbBurnTxHashes}`,
@@ -233,7 +233,7 @@ export class BTCChain {
     );
   }
 
-  async getUnockTxData(txVins: IVin[], txVouts: IVout[]): Promise<string[]> {
+  async getUnlockTxData(txVins: IVin[], txVouts: IVout[]): Promise<string[]> {
     if (!(await this.isAddressInInput(txVins, this.multiAddress)) || txVouts.length < 2) {
       return [];
     }
