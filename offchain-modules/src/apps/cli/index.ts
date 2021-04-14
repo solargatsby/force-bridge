@@ -5,6 +5,7 @@ import { tronCmd } from './tron';
 import { ethCmd } from './eth';
 import { initConfig } from './utils';
 import { btcCmd } from './btc';
+
 export const program = commander.program;
 
 const version = '0.0.1';
