@@ -13,13 +13,14 @@ import { ChainType } from '@force-bridge/ckb/model/asset';
 const { ecsign, toRpcSig } = require('ethereumjs-util');
 
 import { abi } from '@force-bridge/xchain/eth/abi/ForceBridge.json';
+import { SigServer } from './sigserver';
 
 const UnlockABIFuncName = 'unlock';
 export async function signEthTx(payload: collectSignaturesParams, signedDb: SignedDb): Promise<string> {
   logger.debug('signEthTx msg: ', payload);
   const args = require('minimist')(process.argv.slice(2));
   const index = args.index;
-  const privKey = ForceBridgeCore.config.eth.multiSignKeys[index];
+  const privKey = SigServer.config.eth.multiSignKeys[index];
 
   if (!('domainSeparator' in payload.payload)) {
     return Promise.reject(`the type of payload params is wrong`);
@@ -37,7 +38,7 @@ export async function signEthTx(payload: collectSignaturesParams, signedDb: Sign
 
   // Verify whether the user submits duplicate data
   const provider = new ethers.providers.JsonRpcProvider(ForceBridgeCore.config.eth.rpcUrl);
-  const wallet = new ethers.Wallet(privKey, provider);
+  const wallet = new ethers.Wallet(privKey, SigServer.ethProvider);
   const pubkey = wallet.publicKey;
   const signedDbRecords = await signedDb.getSignedByPubkeyAndMsgHash(
     pubkey,
