@@ -2,13 +2,13 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import 'module-alias/register';
 import { JSONRPCServer } from 'json-rpc-2.0';
-import { Config } from '@force-bridge/config';
 import nconf from 'nconf';
 import { logger } from '@force-bridge/utils/logger';
-import { ForceBridgeCore } from '@force-bridge/core';
 import { signEthTx } from './eth';
-import { signCkbTx, init } from './ckb';
 import { collectSignaturesParams } from '@force-bridge/multisig/multisig-mgr';
+import { SigServer } from './sigserver';
+import { SigServerConfig } from './config';
+import { signCkbTx } from './ckbSigner';
 import { createConnection } from 'typeorm';
 import { SignedDb } from '@force-bridge/db/signed';
 
@@ -18,25 +18,9 @@ async function main() {
   const args = require('minimist')(process.argv.slice(2));
   const configPath = process.env.CONFIG_PATH || './config.json';
   nconf.env().file({ file: configPath });
+  const config: SigServerConfig = nconf.get('forceBridge');
 
-  const config: Config = nconf.get('forceBridge');
-  await new ForceBridgeCore().init(config);
-
-  init({
-    eth: {
-      rpcUrl: config.eth.rpcUrl,
-      contractAddress: config.eth.contractAddress,
-    },
-    ckb: {
-      multisigScript: config.ckb.multisigScript,
-      multisigType: config.ckb.multisigType,
-      deps: {
-        bridgeLock: config.ckb.deps.bridgeLock,
-        recipientType: config.ckb.deps.recipientType,
-        sudtType: config.ckb.deps.sudtType,
-      },
-    },
-  });
+  new SigServer(config);
 
   const server = new JSONRPCServer();
   const conn = await createConnection();
