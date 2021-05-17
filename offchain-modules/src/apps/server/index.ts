@@ -41,7 +41,7 @@ async function main() {
   server.addMethod('signCkbTx', async (params: collectSignaturesParams) => {
     return await signCkbTx(params);
   });
-  server.addMethod('signEthTx', async (payload) => {
+  server.addMethod('signEthTx', async (payload: collectSignaturesParams) => {
     return await signEthTx(payload);
   });
 
