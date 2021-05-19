@@ -5,8 +5,8 @@ import { lockTopic } from '@force-bridge/xchain/eth';
 import { fromHexString, uint8ArrayToString } from '@force-bridge/utils';
 import { Address, AddressType, Amount } from '@lay2/pw-core';
 import { Cell } from '@ckb-lumos/base';
-import { SigServer } from './sigserver';
 import { ForceBridgeCore } from '@force-bridge/core';
+import { SigServer } from './sigServer';
 
 async function verifyCreateCellTx(rawData: string, payload: ckbCollectSignaturesPayload): Promise<Error> {
   const txSkeleton = payload.txSkeleton;

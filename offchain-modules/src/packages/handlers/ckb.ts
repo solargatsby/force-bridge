@@ -274,7 +274,7 @@ export class CkbHandler {
         const tx = sealTransaction(txSkeleton, [content0, content1]);
         const mintTxHash = await this.transactionManager.send_transaction(tx);
         logger.info(
-            `CkbHandler handleMintRecords Mint Transaction has been sent, ckbTxHash ${mintTxHash}, mintIds:${mintIds}`,
+          `CkbHandler handleMintRecords Mint Transaction has been sent, ckbTxHash ${mintTxHash}, mintIds:${mintIds}`,
         );
         const txStatus = await this.waitUntilCommitted(mintTxHash, 60);
         if (txStatus.txStatus.status === 'committed') {

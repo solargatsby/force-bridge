@@ -22,7 +22,7 @@ const CKB_URL = nconf.get('forceBridge:ckb:ckbRpcUrl');
 const CKB_IndexerURL = nconf.get('forceBridge:ckb:ckbIndexerUrl');
 const PRI_KEY = nconf.get('forceBridge:ckb:fromPrivateKey');
 const ckb = new CKB(CKB_URL);
-const generator = new CkbTxGenerator(ckb, new IndexerCollector(new CkbIndexer(CKB_URL, CKB_IndexerURL)));
+// const generator = new CkbTxGenerator(ckb, new IndexerCollector(new CkbIndexer(CKB_URL, CKB_IndexerURL)));
 
 const PUB_KEY = ckb.utils.privateKeyToPublicKey(PRI_KEY);
 const ARGS = `0x${ckb.utils.blake160(PUB_KEY, 'hex')}`;
@@ -82,29 +82,30 @@ function getPreDeployedAssets() {
   ];
 }
 
-async function createBridgeCell(assets: Asset[]) {
-  const { secp256k1Dep } = await ckb.loadDeps();
-
-  const lockscript = Script.fromRPC({
-    code_hash: secp256k1Dep.codeHash,
-    args: ARGS,
-    hash_type: secp256k1Dep.hashType,
-  });
-
-  let bridgeLockScripts = [];
-  for (const asset of assets) {
-    bridgeLockScripts.push({
-      codeHash: nconf.get('forceBridge:ckb:deps:bridgeLock:script:codeHash'),
-      hashType: 'data',
-      args: asset.toBridgeLockscriptArgs(),
-    });
-  }
-  const rawTx = await generator.createBridgeCell(lockscript, bridgeLockScripts);
-  const signedTx = ckb.signTransaction(PRI_KEY)(rawTx);
-  const tx_hash = await ckb.rpc.sendTransaction(signedTx);
-  const txStatus = await waitUntilCommitted(tx_hash);
-  console.log('pre deploy assets tx status', txStatus);
-}
+// async function createBridgeCell(assets: Asset[]) {
+//   const { secp256k1Dep } = await ckb.loadDeps();
+//
+//   const lockscript = Script.fromRPC({
+//     code_hash: secp256k1Dep.codeHash,
+//     args: ARGS,
+//     hash_type: secp256k1Dep.hashType,
+//   });
+//   const indexer = new Indexer(ForceBridgeCore.config.ckb.ckbRpcUrl, 'deploy_lumos/');
+//   indexer.startForever();
+//   let bridgeLockScripts = [];
+//   for (const asset of assets) {
+//     bridgeLockScripts.push({
+//       codeHash: nconf.get('forceBridge:ckb:deps:bridgeLock:script:codeHash'),
+//       hashType: 'data',
+//       args: asset.toBridgeLockscriptArgs(),
+//     });
+//   }
+//   const rawTx = await generator.createBridgeCell(bridgeLockScripts, indexer);
+//   const signedTx = ckb.signTransaction(PRI_KEY)(rawTx);
+//   const tx_hash = await ckb.rpc.sendTransaction(signedTx);
+//   const txStatus = await waitUntilCommitted(tx_hash);
+//   console.log('pre deploy assets tx status', txStatus);
+// }
 
 const deploy = async () => {
   const lockscriptBin = await fs.readFile('../ckb-contracts/build/release/bridge-lockscript');
@@ -294,8 +295,8 @@ const main = async () => {
   await setStartTime();
   await setOwnerLockHash();
 
-  const assets = getPreDeployedAssets();
-  await createBridgeCell(assets);
+  // const assets = getPreDeployedAssets();
+  // await createBridgeCell(assets);
 
   await setXChainStartTime();
 
