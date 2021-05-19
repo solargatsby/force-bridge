@@ -247,6 +247,7 @@ export class CkbHandler {
         await this.db.updateCkbMint(mintRecords);
         await this.waitUntilSync();
         const txSkeleton = await generator.mint(records, this.indexer);
+        logger.info(`mint tx txSkeleton ${JSON.stringify(txSkeleton, null, 2)}`);
         const content0 = key.signRecoverable(
           txSkeleton.get('signingEntries').get(0).message,
           ForceBridgeCore.config.ckb.fromPrivateKey,
@@ -381,7 +382,7 @@ export class CkbHandler {
     });
 
     const txSkeleton = await generator.createBridgeCell(scripts, this.indexer);
-    console.log('signingEntries length:', txSkeleton.get('signingEntries').size);
+    logger.info(`signingEntries length:, ${JSON.stringify(txSkeleton, null, 2)}`);
     const message0 = txSkeleton.get('signingEntries').get(0).message;
     const content0 = key.signRecoverable(message0, ForceBridgeCore.config.ckb.fromPrivateKey);
     let content1 = serializeMultisigScript(ForceBridgeCore.config.ckb.multisigScript);
