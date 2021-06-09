@@ -109,7 +109,7 @@ export interface BtcConfig {
 export interface rpcConfig {
   port: number;
   corsOptions?: {
-    origin: string;
+    origin?: string;
     methods?: string;
     preflightContinue?: boolean;
     optionsSuccessStatus?: number;
